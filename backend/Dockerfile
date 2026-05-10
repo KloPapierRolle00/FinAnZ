@@ -1,19 +1,14 @@
-FROM eclipse-temurin:17-jdk-jammy
-
+FROM maven:3.9.7-eclipse-temurin-17 AS builder
 WORKDIR /app
-
-# Install Maven
-RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
 COPY pom.xml ./
 COPY src ./src
 
-# Build mit detailliertem Output
-RUN mvn clean package -Dmaven.test.skip=true -DskipTests 2>&1 | tee build.log
+RUN mvn -B clean package -Dmaven.test.skip=true -DskipTests
+RUN ls -la /app/target
 
-# Wenn der Build fehlschlägt, zeig den Log
-RUN if [ ! -f target/finantz-backend-0.1.0.jar ]; then echo "BUILD FAILED"; cat build.log; exit 1; fi
-
+FROM eclipse-temurin:17-jdk-jammy
+WORKDIR /app
+COPY --from=builder /app/target/finantz-backend-0.1.0.jar ./app.jar
 EXPOSE 8080
-
-CMD ["java", "-jar", "/app/target/finantz-backend-0.1.0.jar"]
+CMD ["java", "-jar", "/app/app.jar"]
