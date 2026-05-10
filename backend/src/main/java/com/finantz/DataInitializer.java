@@ -5,16 +5,13 @@ import com.finantz.model.Budget;
 import com.finantz.model.Category;
 import com.finantz.model.FinancialTransaction;
 import com.finantz.model.TransactionType;
-import com.finantz.model.User;
 import com.finantz.repository.AccountRepository;
 import com.finantz.repository.BudgetRepository;
 import com.finantz.repository.CategoryRepository;
 import com.finantz.repository.TransactionRepository;
-import com.finantz.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 
@@ -24,14 +21,8 @@ public class DataInitializer {
     public CommandLineRunner initData(AccountRepository accountRepository,
                                       CategoryRepository categoryRepository,
                                       TransactionRepository transactionRepository,
-                                      BudgetRepository budgetRepository,
-                                      UserRepository userRepository,
-                                      PasswordEncoder passwordEncoder) {
+                                      BudgetRepository budgetRepository) {
         return args -> {
-            if (userRepository.count() == 0) {
-                userRepository.save(new User("admin", passwordEncoder.encode("admin")));
-            }
-
             if (accountRepository.count() == 0) {
                 Account girokonto = accountRepository.save(new Account("Girokonto", 4200.00));
                 Account cash = accountRepository.save(new Account("Bargeld", 150.00));

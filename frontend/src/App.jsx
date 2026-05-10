@@ -1,22 +1,16 @@
 import { useEffect, useState } from 'react';
-import { fetchAccounts, fetchCategories, fetchTransactions, fetchDashboard, createTransaction, login, register } from './api';
+import { fetchAccounts, fetchCategories, fetchTransactions, fetchDashboard, createTransaction } from './api';
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem('finantz_token') || '');
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [dashboard, setDashboard] = useState({ totalIncome: 0, totalExpense: 0, balance: 0, budgets: [] });
   const [form, setForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
-  const [authForm, setAuthForm] = useState({ username: '', password: '' });
-  const [authMessage, setAuthMessage] = useState('');
-  const [isRegister, setIsRegister] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      loadData();
-    }
-  }, [token]);
+    loadData();
+  }, []);
 
   async function loadData() {
     setAccounts(await fetchAccounts());
@@ -31,8 +25,8 @@ function App() {
       description: form.description,
       amount: parseFloat(form.amount),
       type: form.type,
-      account: { id: parseInt(form.accountId) },
-      category: { id: parseInt(form.categoryId) }
+      account: { id: parseInt(form.accountId, 10) },
+      category: { id: parseInt(form.categoryId, 10) }
     };
 
     await createTransaction(payload);
@@ -40,79 +34,14 @@ function App() {
     loadData();
   };
 
-  const handleAuth = async (event) => {
-    event.preventDefault();
-    setAuthMessage('');
-
-    if (isRegister) {
-      const result = await register(authForm);
-      setAuthMessage(result.message || 'Registrierung abgeschlossen');
-      if (result.token) {
-        localStorage.setItem('finantz_token', result.token);
-        setToken(result.token);
-      }
-      return;
-    }
-
-    const result = await login(authForm);
-    if (result.token) {
-      localStorage.setItem('finantz_token', result.token);
-      setToken(result.token);
-      setAuthMessage('Login erfolgreich');
-    } else {
-      setAuthMessage(result.message || 'Login fehlgeschlagen');
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('finantz_token');
-    setToken('');
-    setAuthForm({ username: '', password: '' });
-    setAccounts([]);
-    setCategories([]);
-    setTransactions([]);
-    setDashboard({ totalIncome: 0, totalExpense: 0, balance: 0, budgets: [] });
-  };
-
-  if (!token) {
-    return (
-      <div className="app-shell">
-        <header>
-          <h1>Finantz</h1>
-          <p>Bitte anmelden, um die Finanzübersicht zu sehen.</p>
-        </header>
-
-        <section className="panel auth-panel">
-          <h2>{isRegister ? 'Registrieren' : 'Login'}</h2>
-          <form onSubmit={handleAuth} className="transaction-form">
-            <label>
-              Benutzername
-              <input value={authForm.username} onChange={(e) => setAuthForm({ ...authForm, username: e.target.value })} required />
-            </label>
-            <label>
-              Passwort
-              <input type="password" value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} required />
-            </label>
-            <button type="submit">{isRegister ? 'Registrieren' : 'Anmelden'}</button>
-          </form>
-          <button className="ghost-button" onClick={() => setIsRegister(!isRegister)}>
-            {isRegister ? 'Zum Login wechseln' : 'Registrieren'}
-          </button>
-          {authMessage && <p className="auth-message">{authMessage}</p>}
-        </section>
-      </div>
-    );
-  }
-
   return (
     <div className="app-shell">
       <header>
         <div className="header-row">
           <div>
             <h1>Finantz</h1>
-            <p>Basis-MVP für Einnahmen, Ausgaben, Budgets und Konten.</p>
+            <p>Schneller Start: Einnahmen, Ausgaben und Budgetübersicht.</p>
           </div>
-          <button className="ghost-button" onClick={logout}>Logout</button>
         </div>
       </header>
 
