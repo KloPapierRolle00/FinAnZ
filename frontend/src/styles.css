@@ -1,0 +1,168 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, system-ui, sans-serif;
+  background: #f2f6ff;
+  color: #1f2937;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #e8efff 0%, #f2f6ff 50%, #eef2ff 100%);
+}
+
+.app-shell {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+header p {
+  margin: 8px 0 24px;
+  color: #475569;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 18px;
+  margin-bottom: 20px;
+}
+
+.panel {
+  background: white;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.06);
+}
+
+.panel h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid #eef2ff;
+}
+
+th {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.negative {
+  color: #be123c;
+}
+
+.positive {
+  color: #15803d;
+}
+
+.transaction-form {
+  display: grid;
+  gap: 12px;
+}
+
+.transaction-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #334155;
+}
+
+.transaction-form input,
+.transaction-form select {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  background: #f8fafc;
+}
+
+button {
+  width: fit-content;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 999px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  background: #1d4ed8;
+}
+
+.ghost-button {
+  margin-top: 14px;
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+}
+
+.auth-panel {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.auth-message {
+  margin-top: 12px;
+  color: #334155;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-bottom: 20px;
+}
+
+.summary-card p {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.budget-ok {
+  color: #047857;
+}
+
+.budget-warn {
+  color: #b45309;
+}
+
+.budget-over {
+  color: #b91c1c;
+}
+
+.budget-status {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.05);
+  font-size: 0.8rem;
+  font-weight: 600;
+}

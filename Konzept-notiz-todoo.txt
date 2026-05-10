@@ -1,0 +1,359 @@
+📊 Konzept: Self-Hosted Finanz-App (Java + Docker)
+
+🎯 Ziel
+Eine moderne, selbstgehostete Finanz-App zur Verwaltung von Einnahmen, Ausgaben und Sparzielen.
+Fokus:
+
+schnelle Eingabe
+klare Übersicht
+realistisches „verfügbares Geld“
+sichere Nutzung im Heimnetzwerk
+
+Zugriff:
+
+PC & Smartphone (Webbrowser)
+
+
+🧩 Funktionen
+
+1. 💸 Einnahmen & Ausgaben
+Ausgaben
+
+Einmalige Ausgaben (z. B. Einkäufe)
+Wiederkehrende Ausgaben:
+monatlich
+jährlich
+individuell definierbar
+
+
+
+Einnahmen
+
+Einmalige Einnahmen
+Wiederkehrende Einnahmen (z. B. Gehalt)
+
+
+2. 🗂️ Kategorien & Vorlagen
+
+Frei definierbare Kategorien:
+
+z. B. Lebensmittel, Fixkosten, Freizeit
+
+
+Vorlagen:
+
+z. B. „Netflix“, „Supermarkt“
+
+
+Schnellauswahl beim Erfassen
+
+
+
+3. 🏦 Konten-System
+
+Mehrere Konten:
+
+Girokonto
+Bargeld
+Kreditkarte (optional)
+
+
+Jede Transaktion gehört zu einem Konto
+
+Anzeige aktueller Kontostände
+
+
+
+4. 📊 Budget-System
+
+Budget pro Kategorie
+Status:
+✅ im Rahmen
+⚠️ nahe Limit
+❌ überschritten
+
+
+
+
+5. 🏷️ Tags / Labels
+
+Mehrere Tags pro Eintrag möglich
+Erweiterte Filter & Auswertungen
+
+
+6. 📈 Dashboard & Statistiken
+
+Monatsübersicht:
+
+Einnahmen
+Ausgaben
+Saldo
+
+
+Visualisierungen:
+
+Kategorien-Verteilung
+Verlauf
+größte Ausgaben
+
+
+Sparquote (optional)
+
+
+
+7. 🔍 Suche & Filter
+
+Filter nach:
+
+Datum
+Kategorie
+Konto
+Betrag
+
+
+Volltextsuche
+
+
+
+8. 📥 Datenimport (optional)
+
+CSV-Import (Bankdaten)
+automatische Kategorisierung (optional)
+
+
+➕ Sparpläne & verfügbares Budget
+
+💰 Sparpläne
+
+Sparziele:
+
+z. B. Auto, Urlaub
+
+
+Eigenschaften:
+
+Zielbetrag (optional)
+monatlicher Sparbetrag
+
+
+Fortschritt & Prognose
+
+
+
+💸 Einzahlungen
+
+z. B. „Auto verkauft → 8000 €“
+Geld wird:
+vom Konto abgezogen
+dem Sparplan zugeordnet
+
+
+
+👉 zählt nicht als verfügbares Geld
+
+🔒 Reserviertes Geld
+
+Spargeld = „nicht verfügbar“
+verhindert falsche Budgeteinschätzung
+
+
+🔁 Automatisches Sparen
+
+monatliche Abbuchung
+wird wie Fixkosten behandelt
+
+
+⚠️ Verfügbares Monatsbudget
+verfu¨gbar=Einnahmen−Fixkosten−Sparbetra¨ge−geplanteAusgaben
+
+📊 Anzeige
+
+„Noch verfügbar diesen Monat“
+Beispiel:
+Kontostand: 10.000 €
+Verfügbar: 800 €
+
+
+
+
+🚨 Warnsystem
+
+Warnungen:
+„Nur noch 100 € verfügbar“
+„Budget überschritten“
+
+
+
+
+🧠 Logik
+
+Sparen hat Priorität
+Zugriff auf Spargeld möglich:
+aber mit Warnung
+
+
+
+
+🔐 Sicherheit & Login
+Login-System
+
+Benutzername + Passwort
+Passwort-Hashing (BCrypt)
+
+Session / Auth
+
+JWT oder Session-basiert
+
+Erweiterungen
+
+2-Faktor-Authentifizierung (optional)
+
+
+🔒 Zugriff
+
+Zugriff nur über:
+
+VPN (empfohlen)
+
+
+optional:
+
+HTTPS (Reverse Proxy z. B. Nginx)
+
+
+
+
+🌙 UI / UX
+Dark Mode ✅
+
+Umschaltbar (Light / Dark)
+Speicherung der Präferenz
+
+
+Mobile Optimierung
+
+schnelle Eingabe („Quick Add“)
+große Buttons
+minimaler Aufwand
+
+
+UX Fokus
+
+so wenig Klicks wie möglich
+Vorlagen nutzen
+klare Anzeige:
+
+👉 Kontostand vs. Verfügbar
+
+⚙️ Technische Umsetzung
+
+🧠 Backend
+
+Java + Spring Boot
+REST API
+
+
+🗄️ Datenbank
+
+SQLite
+
+Vorteile:
+
+einfache Datei
+perfekt für Home Server
+leicht zu sichern
+
+
+🧩 ORM
+
+JPA / Hibernate
+
+
+🌐 Frontend
+
+Web-App:
+React / Vue (empfohlen)
+oder einfache Server-Templates
+
+
+
+
+🐳 Deployment (Docker)
+
+Setup
+
+1 Container:
+
+Spring Boot App
+
+
+Volume:
+
+SQLite DB Datei
+
+
+
+
+Vorteile
+
+einfache Installation
+Updates ohne Chaos
+Backup = eine Datei
+
+
+Beispiel
+
+DB Pfad:
+/data/data.db
+
+
+
+
+💾 Backup & Datenmanagement
+
+Automatisches Backup:
+
+täglich oder wöchentlich
+
+
+Speicherort:
+
+NAS / Netzlaufwerk
+
+
+Export:
+
+JSON / CSV
+
+
+Import:
+
+Wiederherstellung möglich
+
+
+
+
+🚀 Erweiterungen (optional)
+
+Multi-User (Haushalt)
+Push-Benachrichtigungen
+KI-Auswertung (z. B. Spartipps)
+Bank-API Integration
+
+
+✅ Fazit
+Die App kombiniert:
+
+Kontrolle über Finanzen
+aktives Sparen
+klare Budgetführung
+
+Technisch:
+
+Java + Spring Boot → stabil & erweiterbar
+Docker → einfach betreibbar
+SQLite → perfekt für Zuhause
+
+👉 Ziel:
+Maximale Übersicht bei minimalem Aufwand.
+:::
