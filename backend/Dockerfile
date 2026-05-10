@@ -1,8 +1,9 @@
 FROM maven:3.9.7-eclipse-temurin-17 AS builder
 WORKDIR /app
 COPY pom.xml ./
+RUN mvn -q dependency:resolve || true
 COPY src ./src
-RUN mvn -q -Dmaven.test.skip=true package
+RUN mvn -q -Dmaven.test.skip=true -DskipTests package || mvn -Dmaven.test.skip=true package
 
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
