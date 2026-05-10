@@ -1,17 +1,19 @@
 FROM maven:3.9.7-eclipse-temurin-17 AS builder
 WORKDIR /app
 
-# Download dependencies erst
 COPY pom.xml ./
-RUN mvn dependency:go-offline -B 2>&1 || echo "Dependency download attempt completed"
-
-# Build
 COPY src ./src
-RUN mvn -B -Dmaven.test.skip=true -DskipTests clean package 2>&1 | head -100
+
+# Build mit verbose output
+RUN mvn -X clean package -Dmaven.test.skip=true -DskipTests
 
 # Runtime
 FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
-COPY --from=builder /app/target/finantz-backend-*.jar ./app.jar
+
+# Kopiere das JAR und zeige an was da ist
+COPY --from=builder /app/target/*.jar ./app.jar
+RUN ls -la /app/
+
 EXPOSE 8080
 CMD ["java", "-jar", "app.jar"]
