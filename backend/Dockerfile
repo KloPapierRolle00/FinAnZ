@@ -8,13 +8,12 @@ RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 COPY pom.xml ./
 COPY src ./src
 
-# Build
-RUN mvn clean package -Dmaven.test.skip=true -DskipTests || echo "Build completed"
+# Build mit detailliertem Output
+RUN mvn clean package -Dmaven.test.skip=true -DskipTests 2>&1 | tee build.log
 
-# Check if JAR exists
-RUN ls -la /app/target/ || echo "Target directory listing failed"
+# Wenn der Build fehlschlägt, zeig den Log
+RUN if [ ! -f target/finantz-backend-0.1.0.jar ]; then echo "BUILD FAILED"; cat build.log; exit 1; fi
 
 EXPOSE 8080
 
-# Run
 CMD ["java", "-jar", "/app/target/finantz-backend-0.1.0.jar"]
