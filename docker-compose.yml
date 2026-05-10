@@ -4,7 +4,7 @@ services:
     build:
       context: ./backend
     ports:
-      - "8080:8080"
+      - "2244:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
 
