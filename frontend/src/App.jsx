@@ -8,20 +8,28 @@ import {
   createAccount,
   createCategory,
   updateAccount,
-  updateCategory
+  updateCategory,
+  deleteTransaction,
+  fetchRecurringTransactions,
+  createRecurringTransaction,
+  deleteRecurringTransaction,
+  updateRecurringTransaction
 } from './api';
 
 function App() {
   const [accounts, setAccounts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [recurringTransactions, setRecurringTransactions] = useState([]);
   const [dashboard, setDashboard] = useState({ totalIncome: 0, totalExpense: 0, balance: 0, budgets: [] });
   const [transactionForm, setTransactionForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
   const [accountForm, setAccountForm] = useState({ name: '', balance: '' });
   const [categoryForm, setCategoryForm] = useState({ name: '' });
+  const [recurringForm, setRecurringForm] = useState({ description: '', amount: '', type: 'EXPENSE', dayOfMonth: '1', accountId: '', categoryId: '' });
   const [activeModal, setActiveModal] = useState(null);
   const [currentEditAccount, setCurrentEditAccount] = useState(null);
   const [currentEditCategory, setCurrentEditCategory] = useState(null);
+  const [currentEditRecurring, setCurrentEditRecurring] = useState(null);
   const [filters, setFilters] = useState({ q: '', accountId: '', categoryId: '', from: '', to: '' });
 
   useEffect(() => {
@@ -32,6 +40,7 @@ function App() {
     setAccounts(await fetchAccounts());
     setCategories(await fetchCategories());
     setTransactions(await fetchTransactions(filters));
+    setRecurringTransactions(await fetchRecurringTransactions());
     setDashboard(await fetchDashboard());
   }
 
@@ -127,6 +136,48 @@ function App() {
     setTransactions(await fetchTransactions(empty));
   };
 
+  const openNewRecurringModal = () => {
+    setCurrentEditRecurring(null);
+    setRecurringForm({ description: '', amount: '', type: 'EXPENSE', dayOfMonth: '1', accountId: '', categoryId: '' });
+    setActiveModal('recurring');
+  };
+
+  const saveRecurring = async (event) => {
+    event.preventDefault();
+    const payload = {
+      description: recurringForm.description,
+      amount: parseFloat(recurringForm.amount),
+      type: recurringForm.type,
+      dayOfMonth: parseInt(recurringForm.dayOfMonth, 10),
+      account: { id: parseInt(recurringForm.accountId, 10) },
+      category: { id: parseInt(recurringForm.categoryId, 10) }
+    };
+
+    if (currentEditRecurring) {
+      await updateRecurringTransaction(currentEditRecurring.id, payload);
+    } else {
+      await createRecurringTransaction(payload);
+    }
+
+    setActiveModal(null);
+    setCurrentEditRecurring(null);
+    loadData();
+  };
+
+  const deleteTransactionHandler = async (id) => {
+    if (confirm('Transaktion wirklich löschen?')) {
+      await deleteTransaction(id);
+      loadData();
+    }
+  };
+
+  const deleteRecurringHandler = async (id) => {
+    if (confirm('Wiederkehrende Transaktion wirklich löschen?')) {
+      await deleteRecurringTransaction(id);
+      loadData();
+    }
+  };
+
   return (
     <div className="app-shell">
       <header>
@@ -203,6 +254,37 @@ function App() {
 
       <section className="panel">
         <div className="panel-header">
+          <h2>Wiederkehrende Transaktionen</h2>
+          <button type="button" className="ghost-button" onClick={openNewRecurringModal}>Neue wiederkehrende Transaktion</button>
+        </div>
+        <ul>
+          {recurringTransactions.map((recurring) => (
+            <li key={recurring.id} className="entity-row">
+              <div className="entity-view-row">
+                <span><strong>{recurring.description}</strong> - {recurring.amount.toFixed(2)}€ am {recurring.dayOfMonth}. des Monats ({recurring.type})</span>
+                <div className="entity-actions">
+                  <button type="button" className="ghost-button" onClick={() => {
+                    setCurrentEditRecurring(recurring);
+                    setRecurringForm({
+                      description: recurring.description,
+                      amount: recurring.amount,
+                      type: recurring.type,
+                      dayOfMonth: recurring.dayOfMonth,
+                      accountId: recurring.account?.id || '',
+                      categoryId: recurring.category?.id || ''
+                    });
+                    setActiveModal('recurring');
+                  }}>Bearbeiten</button>
+                  <button type="button" className="ghost-button" onClick={() => deleteRecurringHandler(recurring.id)}>Löschen</button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
           <h2>Transaktionen</h2>
           <button type="button" className="ghost-button" onClick={openNewTransactionModal}>Neue Transaktion</button>
         </div>
@@ -255,6 +337,7 @@ function App() {
               <th>Betrag</th>
               <th>Konto</th>
               <th>Kategorie</th>
+              <th>Aktionen</th>
             </tr>
           </thead>
           <tbody>
@@ -265,6 +348,9 @@ function App() {
                 <td className={tx.amount < 0 ? 'negative' : 'positive'}>{tx.amount.toFixed(2)}</td>
                 <td>{tx.account?.name}</td>
                 <td>{tx.category?.name}</td>
+                <td>
+                  <button type="button" className="ghost-button" onClick={() => deleteTransactionHandler(tx.id)} style={{ padding: '6px 12px', fontSize: '0.9rem' }}>Löschen</button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -361,6 +447,60 @@ function App() {
               <div className="modal-actions">
                 <button type="submit">Speichern</button>
                 <button type="button" className="ghost-button" onClick={closeModal}>Abbrechen</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeModal === 'recurring' && (
+        <div className="modal-overlay" onClick={() => setActiveModal(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{currentEditRecurring ? 'Wiederkehrende Transaktion bearbeiten' : 'Neue wiederkehrende Transaktion'}</h2>
+              <button type="button" className="close-button" onClick={() => setActiveModal(null)}>×</button>
+            </div>
+            <form onSubmit={saveRecurring} className="transaction-form">
+              <label>
+                Beschreibung
+                <input value={recurringForm.description} onChange={(e) => setRecurringForm({ ...recurringForm, description: e.target.value })} required />
+              </label>
+              <label>
+                Betrag
+                <input type="number" step="0.01" value={recurringForm.amount} onChange={(e) => setRecurringForm({ ...recurringForm, amount: e.target.value })} required />
+              </label>
+              <label>
+                Typ
+                <select value={recurringForm.type} onChange={(e) => setRecurringForm({ ...recurringForm, type: e.target.value })}>
+                  <option value="EXPENSE">Ausgabe</option>
+                  <option value="INCOME">Einnahme</option>
+                </select>
+              </label>
+              <label>
+                Tag des Monats (1-31)
+                <input type="number" min="1" max="31" value={recurringForm.dayOfMonth} onChange={(e) => setRecurringForm({ ...recurringForm, dayOfMonth: e.target.value })} required />
+              </label>
+              <label>
+                Konto
+                <select value={recurringForm.accountId} onChange={(e) => setRecurringForm({ ...recurringForm, accountId: e.target.value })} required>
+                  <option value="">Wähle ein Konto</option>
+                  {accounts.map((account) => (
+                    <option key={account.id} value={account.id}>{account.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Kategorie
+                <select value={recurringForm.categoryId} onChange={(e) => setRecurringForm({ ...recurringForm, categoryId: e.target.value })} required>
+                  <option value="">Wähle eine Kategorie</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+              </label>
+              <div className="modal-actions">
+                <button type="submit">Speichern</button>
+                <button type="button" className="ghost-button" onClick={() => setActiveModal(null)}>Abbrechen</button>
               </div>
             </form>
           </div>

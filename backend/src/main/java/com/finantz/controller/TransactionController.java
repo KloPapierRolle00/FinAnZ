@@ -99,4 +99,13 @@ public class TransactionController {
         FinancialTransaction saved = transactionRepository.save(transaction);
         return ResponseEntity.ok(saved);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id) {
+        if (transactionRepository.existsById(id)) {
+            transactionRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

@@ -73,3 +73,40 @@ export async function updateCategory(id, category) {
   });
   return response.json();
 }
+
+export async function deleteTransaction(id) {
+  const response = await fetch(`${API_BASE}/transactions/${id}`, {
+    method: 'DELETE'
+  });
+  return response.ok;
+}
+
+export async function fetchRecurringTransactions() {
+  const response = await fetch(`${API_BASE}/recurring-transactions`);
+  return response.json();
+}
+
+export async function createRecurringTransaction(transaction) {
+  const response = await fetch(`${API_BASE}/recurring-transactions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(transaction)
+  });
+  return response.json();
+}
+
+export async function updateRecurringTransaction(id, transaction) {
+  const response = await fetch(`${API_BASE}/recurring-transactions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(transaction)
+  });
+  return response.json();
+}
+
+export async function deleteRecurringTransaction(id) {
+  const response = await fetch(`${API_BASE}/recurring-transactions/${id}`, {
+    method: 'DELETE'
+  });
+  return response.ok;
+}
