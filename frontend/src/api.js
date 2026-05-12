@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:2244/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://backend:8080/api';
 
 function buildQuery(params) {
   return Object.entries(params)
