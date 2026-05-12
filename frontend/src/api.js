@@ -1,4 +1,11 @@
-const API_BASE = 'http://localhost:2244/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:2244/api';
+
+function buildQuery(params) {
+  return Object.entries(params)
+    .filter(([, value]) => value !== undefined && value !== null && value !== '')
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .join('&');
+}
 
 export async function fetchAccounts() {
   const response = await fetch(`${API_BASE}/accounts`);
@@ -10,8 +17,10 @@ export async function fetchCategories() {
   return response.json();
 }
 
-export async function fetchTransactions() {
-  const response = await fetch(`${API_BASE}/transactions`);
+export async function fetchTransactions(filters = {}) {
+  const query = buildQuery(filters);
+  const url = `${API_BASE}/transactions${query ? `/search?${query}` : ''}`;
+  const response = await fetch(url);
   return response.json();
 }
 

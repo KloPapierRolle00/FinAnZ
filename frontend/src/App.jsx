@@ -7,6 +7,7 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [dashboard, setDashboard] = useState({ totalIncome: 0, totalExpense: 0, balance: 0, budgets: [] });
   const [form, setForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
+  const [filters, setFilters] = useState({ q: '', accountId: '', categoryId: '', from: '', to: '' });
 
   useEffect(() => {
     loadData();
@@ -15,7 +16,7 @@ function App() {
   async function loadData() {
     setAccounts(await fetchAccounts());
     setCategories(await fetchCategories());
-    setTransactions(await fetchTransactions());
+    setTransactions(await fetchTransactions(filters));
     setDashboard(await fetchDashboard());
   }
 
@@ -32,6 +33,17 @@ function App() {
     await createTransaction(payload);
     setForm({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
     loadData();
+  };
+
+  const applyFilters = async (event) => {
+    event.preventDefault();
+    setTransactions(await fetchTransactions(filters));
+  };
+
+  const resetFilters = async () => {
+    const empty = { q: '', accountId: '', categoryId: '', from: '', to: '' };
+    setFilters(empty);
+    setTransactions(await fetchTransactions(empty));
   };
 
   return (
@@ -93,6 +105,46 @@ function App() {
 
       <section className="panel">
         <h2>Transaktionen</h2>
+        <form onSubmit={applyFilters} className="filter-form">
+          <div className="filter-row">
+            <label>
+              Suche
+              <input type="text" value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} placeholder="Beschreibung" />
+            </label>
+            <label>
+              Konto
+              <select value={filters.accountId} onChange={(e) => setFilters({ ...filters, accountId: e.target.value })}>
+                <option value="">Alle</option>
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>{account.name}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Kategorie
+              <select value={filters.categoryId} onChange={(e) => setFilters({ ...filters, categoryId: e.target.value })}>
+                <option value="">Alle</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>{category.name}</option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="filter-row">
+            <label>
+              Von
+              <input type="date" value={filters.from} onChange={(e) => setFilters({ ...filters, from: e.target.value })} />
+            </label>
+            <label>
+              Bis
+              <input type="date" value={filters.to} onChange={(e) => setFilters({ ...filters, to: e.target.value })} />
+            </label>
+            <div className="filter-actions">
+              <button type="submit">Anwenden</button>
+              <button type="button" className="ghost-button" onClick={resetFilters}>Zurücksetzen</button>
+            </div>
+          </div>
+        </form>
         <table>
           <thead>
             <tr>

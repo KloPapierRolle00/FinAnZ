@@ -33,6 +33,50 @@ public class TransactionController {
         return transactionRepository.findAll();
     }
 
+    @GetMapping("/search")
+    public List<FinancialTransaction> searchTransactions(
+            @RequestParam(required = false) Long accountId,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String q,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to,
+            @RequestParam(required = false) Double minAmount,
+            @RequestParam(required = false) Double maxAmount) {
+
+        return transactionRepository.findAll().stream()
+                .filter(tx -> {
+                    if (accountId != null && (tx.getAccount() == null || !accountId.equals(tx.getAccount().getId()))) {
+                        return false;
+                    }
+                    if (categoryId != null && (tx.getCategory() == null || !categoryId.equals(tx.getCategory().getId()))) {
+                        return false;
+                    }
+                    if (q != null && !q.isBlank() && !tx.getDescription().toLowerCase().contains(q.toLowerCase())) {
+                        return false;
+                    }
+                    if (from != null && !from.isBlank()) {
+                        LocalDate fromDate = LocalDate.parse(from);
+                        if (tx.getDate().isBefore(fromDate)) {
+                            return false;
+                        }
+                    }
+                    if (to != null && !to.isBlank()) {
+                        LocalDate toDate = LocalDate.parse(to);
+                        if (tx.getDate().isAfter(toDate)) {
+                            return false;
+                        }
+                    }
+                    if (minAmount != null && tx.getAmount() < minAmount) {
+                        return false;
+                    }
+                    if (maxAmount != null && tx.getAmount() > maxAmount) {
+                        return false;
+                    }
+                    return true;
+                })
+                .toList();
+    }
+
     @PostMapping
     public ResponseEntity<FinancialTransaction> createTransaction(@RequestBody FinancialTransaction transaction) {
         if (transaction.getDate() == null) {
