@@ -25,7 +25,7 @@ function App() {
   const [transactionForm, setTransactionForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
   const [accountForm, setAccountForm] = useState({ name: '', balance: '' });
   const [categoryForm, setCategoryForm] = useState({ name: '' });
-  const [recurringForm, setRecurringForm] = useState({ description: '', amount: '', type: 'EXPENSE', dayOfMonth: '1', accountId: '', categoryId: '' });
+  const [recurringForm, setRecurringForm] = useState({ amount: '', type: 'EXPENSE', dayOfMonth: '1', accountId: '', categoryId: '' });
   const [activeModal, setActiveModal] = useState(null);
   const [currentEditAccount, setCurrentEditAccount] = useState(null);
   const [currentEditCategory, setCurrentEditCategory] = useState(null);
@@ -138,14 +138,14 @@ function App() {
 
   const openNewRecurringModal = () => {
     setCurrentEditRecurring(null);
-    setRecurringForm({ description: '', amount: '', type: 'EXPENSE', dayOfMonth: '1', accountId: '', categoryId: '' });
+    setRecurringForm({ amount: '', type: 'EXPENSE', dayOfMonth: '1', accountId: '', categoryId: '' });
     setActiveModal('recurring');
   };
 
   const saveRecurring = async (event) => {
     event.preventDefault();
     const payload = {
-      description: recurringForm.description,
+      description: 'Recurring',
       amount: parseFloat(recurringForm.amount),
       type: recurringForm.type,
       dayOfMonth: parseInt(recurringForm.dayOfMonth, 10),
@@ -261,12 +261,11 @@ function App() {
           {recurringTransactions.map((recurring) => (
             <li key={recurring.id} className="entity-row">
               <div className="entity-view-row">
-                <span><strong>{recurring.description}</strong> - {recurring.amount.toFixed(2)}€ am {recurring.dayOfMonth}. des Monats ({recurring.type})</span>
+                <span><strong>{recurring.category?.name}</strong> - {recurring.amount.toFixed(2)}€ am {recurring.dayOfMonth}. des Monats ({recurring.type})</span>
                 <div className="entity-actions">
                   <button type="button" className="ghost-button" onClick={() => {
                     setCurrentEditRecurring(recurring);
                     setRecurringForm({
-                      description: recurring.description,
                       amount: recurring.amount,
                       type: recurring.type,
                       dayOfMonth: recurring.dayOfMonth,
@@ -461,10 +460,6 @@ function App() {
               <button type="button" className="close-button" onClick={() => setActiveModal(null)}>×</button>
             </div>
             <form onSubmit={saveRecurring} className="transaction-form">
-              <label>
-                Beschreibung
-                <input value={recurringForm.description} onChange={(e) => setRecurringForm({ ...recurringForm, description: e.target.value })} required />
-              </label>
               <label>
                 Betrag
                 <input type="number" step="0.01" value={recurringForm.amount} onChange={(e) => setRecurringForm({ ...recurringForm, amount: e.target.value })} required />
