@@ -117,6 +117,18 @@ th {
   margin-bottom: 20px;
 }
 
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
 .panel ul {
   list-style: none;
   margin: 0;
@@ -187,6 +199,51 @@ button:hover {
   background: transparent;
   border: 1px solid #cbd5e1;
   color: #334155;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px;
+  z-index: 10;
+}
+
+.modal {
+  width: min(560px, 100%);
+  background: white;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 40px 80px rgba(15, 23, 42, 0.16);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.close-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background: transparent;
+  color: #334155;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .auth-panel {
