@@ -132,7 +132,7 @@ function App() {
       <header>
         <div className="header-row">
           <div>
-            <h1>Finantz</h1>
+            <h1>FinAnZ</h1>
             <p>Verwalte Konten, Kategorien und deine nächsten Buchungen.</p>
           </div>
           <div className="header-actions">
