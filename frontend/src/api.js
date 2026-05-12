@@ -55,3 +55,21 @@ export async function createCategory(category) {
   });
   return response.json();
 }
+
+export async function updateAccount(id, account) {
+  const response = await fetch(`${API_BASE}/accounts/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(account)
+  });
+  return response.json();
+}
+
+export async function updateCategory(id, category) {
+  const response = await fetch(`${API_BASE}/categories/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(category)
+  });
+  return response.json();
+}

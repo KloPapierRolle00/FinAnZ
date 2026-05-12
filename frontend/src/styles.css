@@ -128,6 +128,43 @@ th {
   color: #334155;
 }
 
+.entity-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.entity-view-row,
+.entity-edit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.entity-view-row span {
+  flex: 1 1 auto;
+  min-width: 160px;
+}
+
+.entity-edit-row input {
+  flex: 1 1 150px;
+  min-width: 120px;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 1rem;
+  background: #f8fafc;
+}
+
+.entity-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 button {
   width: fit-content;
   padding: 12px 20px;

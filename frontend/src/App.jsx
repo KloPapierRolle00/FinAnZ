@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchAccounts, fetchCategories, fetchTransactions, fetchDashboard, createTransaction, createAccount, createCategory } from './api';
+import { fetchAccounts, fetchCategories, fetchTransactions, fetchDashboard, createTransaction, createAccount, createCategory, updateAccount, updateCategory } from './api';
 
 function App() {
   const [accounts, setAccounts] = useState([]);
@@ -9,6 +9,11 @@ function App() {
   const [form, setForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
   const [accountForm, setAccountForm] = useState({ name: '', balance: '' });
   const [categoryForm, setCategoryForm] = useState({ name: '' });
+  const [editingAccountId, setEditingAccountId] = useState(null);
+  const [editingAccountName, setEditingAccountName] = useState('');
+  const [editingAccountBalance, setEditingAccountBalance] = useState('');
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
   const [filters, setFilters] = useState({ q: '', accountId: '', categoryId: '', from: '', to: '' });
 
   useEffect(() => {
@@ -65,6 +70,45 @@ function App() {
     loadData();
   };
 
+  const startAccountEdit = (account) => {
+    setEditingAccountId(account.id);
+    setEditingAccountName(account.name);
+    setEditingAccountBalance(account.balance.toString());
+  };
+
+  const cancelAccountEdit = () => {
+    setEditingAccountId(null);
+    setEditingAccountName('');
+    setEditingAccountBalance('');
+  };
+
+  const saveAccountEdit = async () => {
+    if (!editingAccountId) return;
+    await updateAccount(editingAccountId, {
+      name: editingAccountName,
+      balance: parseFloat(editingAccountBalance) || 0
+    });
+    cancelAccountEdit();
+    loadData();
+  };
+
+  const startCategoryEdit = (category) => {
+    setEditingCategoryId(category.id);
+    setEditingCategoryName(category.name);
+  };
+
+  const cancelCategoryEdit = () => {
+    setEditingCategoryId(null);
+    setEditingCategoryName('');
+  };
+
+  const saveCategoryEdit = async () => {
+    if (!editingCategoryId) return;
+    await updateCategory(editingCategoryId, { name: editingCategoryName });
+    cancelCategoryEdit();
+    loadData();
+  };
+
   return (
     <div className="app-shell">
       <header>
@@ -105,8 +149,22 @@ function App() {
           <h2>Konten</h2>
           <ul>
             {accounts.map((account) => (
-              <li key={account.id}>
-                {account.name}: {account.balance.toFixed(2)} {account.currency}
+              <li key={account.id} className="entity-row">
+                {editingAccountId === account.id ? (
+                  <div className="entity-edit-row">
+                    <input value={editingAccountName} onChange={(e) => setEditingAccountName(e.target.value)} />
+                    <input type="number" step="0.01" value={editingAccountBalance} onChange={(e) => setEditingAccountBalance(e.target.value)} />
+                    <div className="entity-actions">
+                      <button type="button" onClick={saveAccountEdit}>Speichern</button>
+                      <button type="button" className="ghost-button" onClick={cancelAccountEdit}>Abbrechen</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="entity-view-row">
+                    <span>{account.name}: {account.balance.toFixed(2)} {account.currency}</span>
+                    <button type="button" className="ghost-button" onClick={() => startAccountEdit(account)}>Bearbeiten</button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -116,7 +174,22 @@ function App() {
           <h2>Kategorien</h2>
           <ul>
             {categories.map((category) => (
-              <li key={category.id}>{category.name}</li>
+              <li key={category.id} className="entity-row">
+                {editingCategoryId === category.id ? (
+                  <div className="entity-edit-row">
+                    <input value={editingCategoryName} onChange={(e) => setEditingCategoryName(e.target.value)} />
+                    <div className="entity-actions">
+                      <button type="button" onClick={saveCategoryEdit}>Speichern</button>
+                      <button type="button" className="ghost-button" onClick={cancelCategoryEdit}>Abbrechen</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="entity-view-row">
+                    <span>{category.name}</span>
+                    <button type="button" className="ghost-button" onClick={() => startCategoryEdit(category)}>Bearbeiten</button>
+                  </div>
+                )}
+              </li>
             ))}
           </ul>
         </div>

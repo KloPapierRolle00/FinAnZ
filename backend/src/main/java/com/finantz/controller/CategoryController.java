@@ -26,4 +26,16 @@ public class CategoryController {
         Category saved = categoryRepository.save(category);
         return ResponseEntity.ok(saved);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category update) {
+        return categoryRepository.findById(id)
+                .map(existing -> {
+                    if (update.getName() != null) {
+                        existing.setName(update.getName());
+                    }
+                    return ResponseEntity.ok(categoryRepository.save(existing));
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }

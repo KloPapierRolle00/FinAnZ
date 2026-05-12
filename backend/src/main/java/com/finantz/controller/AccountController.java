@@ -26,4 +26,17 @@ public class AccountController {
         Account saved = accountRepository.save(account);
         return ResponseEntity.ok(saved);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Account> updateAccount(@PathVariable Long id, @RequestBody Account update) {
+        return accountRepository.findById(id)
+                .map(existing -> {
+                    if (update.getName() != null) {
+                        existing.setName(update.getName());
+                    }
+                    existing.setBalance(update.getBalance());
+                    return ResponseEntity.ok(accountRepository.save(existing));
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 }
