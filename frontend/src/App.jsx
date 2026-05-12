@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchAccounts, fetchCategories, fetchTransactions, fetchDashboard, createTransaction } from './api';
+import { fetchAccounts, fetchCategories, fetchTransactions, fetchDashboard, createTransaction, createAccount, createCategory } from './api';
 
 function App() {
   const [accounts, setAccounts] = useState([]);
@@ -7,6 +7,8 @@ function App() {
   const [transactions, setTransactions] = useState([]);
   const [dashboard, setDashboard] = useState({ totalIncome: 0, totalExpense: 0, balance: 0, budgets: [] });
   const [form, setForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
+  const [accountForm, setAccountForm] = useState({ name: '', balance: '' });
+  const [categoryForm, setCategoryForm] = useState({ name: '' });
   const [filters, setFilters] = useState({ q: '', accountId: '', categoryId: '', from: '', to: '' });
 
   useEffect(() => {
@@ -44,6 +46,23 @@ function App() {
     const empty = { q: '', accountId: '', categoryId: '', from: '', to: '' };
     setFilters(empty);
     setTransactions(await fetchTransactions(empty));
+  };
+
+  const handleCreateAccount = async (event) => {
+    event.preventDefault();
+    await createAccount({
+      name: accountForm.name,
+      balance: parseFloat(accountForm.balance) || 0
+    });
+    setAccountForm({ name: '', balance: '' });
+    loadData();
+  };
+
+  const handleCreateCategory = async (event) => {
+    event.preventDefault();
+    await createCategory({ name: categoryForm.name });
+    setCategoryForm({ name: '' });
+    loadData();
   };
 
   return (
@@ -100,6 +119,34 @@ function App() {
               <li key={category.id}>{category.name}</li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      <section className="grid panel-grid">
+        <div className="panel">
+          <h2>Neues Konto</h2>
+          <form onSubmit={handleCreateAccount} className="transaction-form">
+            <label>
+              Name
+              <input value={accountForm.name} onChange={(e) => setAccountForm({ ...accountForm, name: e.target.value })} required />
+            </label>
+            <label>
+              Startsaldo
+              <input type="number" step="0.01" value={accountForm.balance} onChange={(e) => setAccountForm({ ...accountForm, balance: e.target.value })} />
+            </label>
+            <button type="submit">Konto anlegen</button>
+          </form>
+        </div>
+
+        <div className="panel">
+          <h2>Neue Kategorie</h2>
+          <form onSubmit={handleCreateCategory} className="transaction-form">
+            <label>
+              Name
+              <input value={categoryForm.name} onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })} required />
+            </label>
+            <button type="submit">Kategorie anlegen</button>
+          </form>
         </div>
       </section>
 

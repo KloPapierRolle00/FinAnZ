@@ -37,3 +37,21 @@ export async function createTransaction(transaction) {
   });
   return response.json();
 }
+
+export async function createAccount(account) {
+  const response = await fetch(`${API_BASE}/accounts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(account)
+  });
+  return response.json();
+}
+
+export async function createCategory(category) {
+  const response = await fetch(`${API_BASE}/categories`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(category)
+  });
+  return response.json();
+}
