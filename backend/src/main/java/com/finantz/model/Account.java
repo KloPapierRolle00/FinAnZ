@@ -10,14 +10,18 @@ public class Account {
 
     private String name;
     private String currency = "EUR";
-    private double balance;
+    private double initialBalance;
+    
+    @Transient
+    private double currentBalance;
 
     public Account() {
     }
 
     public Account(String name, double balance) {
         this.name = name;
-        this.balance = balance;
+        this.initialBalance = balance;
+        this.currentBalance = balance;
     }
 
     public Long getId() {
@@ -40,11 +44,28 @@ public class Account {
         this.currency = currency;
     }
 
+    public double getInitialBalance() {
+        return initialBalance;
+    }
+
+    public void setInitialBalance(double initialBalance) {
+        this.initialBalance = initialBalance;
+    }
+
+    public double getCurrentBalance() {
+        return currentBalance;
+    }
+
+    public void setCurrentBalance(double currentBalance) {
+        this.currentBalance = currentBalance;
+    }
+
+    // Für Kompatibilität mit altem Code
     public double getBalance() {
-        return balance;
+        return currentBalance;
     }
 
     public void setBalance(double balance) {
-        this.balance = balance;
+        this.currentBalance = balance;
     }
 }

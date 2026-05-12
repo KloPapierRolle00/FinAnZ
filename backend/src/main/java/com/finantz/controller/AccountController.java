@@ -2,6 +2,7 @@ package com.finantz.controller;
 
 import com.finantz.model.Account;
 import com.finantz.repository.AccountRepository;
+import com.finantz.service.BalanceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,19 +12,27 @@ import java.util.List;
 @RequestMapping("/api/accounts")
 public class AccountController {
     private final AccountRepository accountRepository;
+    private final BalanceService balanceService;
 
-    public AccountController(AccountRepository accountRepository) {
+    public AccountController(AccountRepository accountRepository, BalanceService balanceService) {
         this.accountRepository = accountRepository;
+        this.balanceService = balanceService;
     }
 
     @GetMapping
     public List<Account> getAccounts() {
-        return accountRepository.findAll();
+        List<Account> accounts = accountRepository.findAll();
+        // Berechne aktuelle Balance für jedes Konto
+        for (Account account : accounts) {
+            account.setCurrentBalance(balanceService.calculateCurrentBalance(account));
+        }
+        return accounts;
     }
 
     @PostMapping
     public ResponseEntity<Account> createAccount(@RequestBody Account account) {
         Account saved = accountRepository.save(account);
+        saved.setCurrentBalance(balanceService.calculateCurrentBalance(saved));
         return ResponseEntity.ok(saved);
     }
 
@@ -34,8 +43,12 @@ public class AccountController {
                     if (update.getName() != null) {
                         existing.setName(update.getName());
                     }
-                    existing.setBalance(update.getBalance());
-                    return ResponseEntity.ok(accountRepository.save(existing));
+                    if (update.getInitialBalance() > 0) {
+                        existing.setInitialBalance(update.getInitialBalance());
+                    }
+                    existing = accountRepository.save(existing);
+                    existing.setCurrentBalance(balanceService.calculateCurrentBalance(existing));
+                    return ResponseEntity.ok(existing);
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

@@ -52,7 +52,7 @@ function App() {
 
   const openEditAccountModal = (account) => {
     setCurrentEditAccount(account);
-    setAccountForm({ name: account.name, balance: account.balance.toString() });
+    setAccountForm({ name: account.name, balance: account.initialBalance.toString() });
     setActiveModal('account');
   };
 
@@ -83,7 +83,7 @@ function App() {
     event.preventDefault();
     const payload = {
       name: accountForm.name,
-      balance: parseFloat(accountForm.balance) || 0
+      initialBalance: parseFloat(accountForm.balance) || 0
     };
 
     if (currentEditAccount) {
@@ -226,7 +226,7 @@ function App() {
             {accounts.map((account) => (
               <li key={account.id} className="entity-row">
                 <div className="entity-view-row">
-                  <span>{account.name}: {account.balance.toFixed(2)} {account.currency}</span>
+                  <span>{account.name}: {account.currentBalance.toFixed(2)} {account.currency}</span>
                   <button type="button" className="ghost-button" onClick={() => openEditAccountModal(account)}>Bearbeiten</button>
                 </div>
               </li>
