@@ -13,7 +13,12 @@ import {
   fetchRecurringTransactions,
   createRecurringTransaction,
   deleteRecurringTransaction,
-  updateRecurringTransaction
+  updateRecurringTransaction,
+  fetchBudgets,
+  createBudget,
+  updateBudget,
+  deleteBudget,
+  transferMoney
 } from './api';
 
 function App() {
@@ -21,15 +26,19 @@ function App() {
   const [categories, setCategories] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [recurringTransactions, setRecurringTransactions] = useState([]);
+  const [budgets, setBudgets] = useState([]);
   const [dashboard, setDashboard] = useState({ totalIncome: 0, totalExpense: 0, balance: 0, budgets: [] });
-  const [transactionForm, setTransactionForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
+  const [transactionForm, setTransactionForm] = useState({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '', toAccountId: '' });
   const [accountForm, setAccountForm] = useState({ name: '', balance: '' });
   const [categoryForm, setCategoryForm] = useState({ name: '' });
   const [recurringForm, setRecurringForm] = useState({ amount: '', type: 'EXPENSE', dayOfMonth: '1', accountId: '', categoryId: '' });
+  const [budgetForm, setBudgetForm] = useState({ monthlyLimit: '', categoryId: '' });
   const [activeModal, setActiveModal] = useState(null);
   const [currentEditAccount, setCurrentEditAccount] = useState(null);
   const [currentEditCategory, setCurrentEditCategory] = useState(null);
   const [currentEditRecurring, setCurrentEditRecurring] = useState(null);
+  const [currentEditBudget, setCurrentEditBudget] = useState(null);
+  const [isTransfer, setIsTransfer] = useState(false);
   const [filters, setFilters] = useState({ q: '', accountId: '', categoryId: '', from: '', to: '' });
 
   useEffect(() => {
@@ -41,6 +50,7 @@ function App() {
     setCategories(await fetchCategories());
     setTransactions(await fetchTransactions(filters));
     setRecurringTransactions(await fetchRecurringTransactions());
+    setBudgets(await fetchBudgets());
     setDashboard(await fetchDashboard());
   }
 
@@ -69,7 +79,14 @@ function App() {
   };
 
   const openNewTransactionModal = () => {
-    setTransactionForm({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '' });
+    setIsTransfer(false);
+    setTransactionForm({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '', toAccountId: '' });
+    setActiveModal('transaction');
+  };
+
+  const openTransferModal = () => {
+    setIsTransfer(true);
+    setTransactionForm({ description: '', amount: '', type: 'EXPENSE', accountId: '', categoryId: '', toAccountId: '' });
     setActiveModal('transaction');
   };
 
@@ -77,6 +94,8 @@ function App() {
     setActiveModal(null);
     setCurrentEditAccount(null);
     setCurrentEditCategory(null);
+    setCurrentEditRecurring(null);
+    setCurrentEditBudget(null);
   };
 
   const saveAccount = async (event) => {
@@ -112,17 +131,58 @@ function App() {
 
   const saveTransaction = async (event) => {
     event.preventDefault();
-    const payload = {
-      description: transactionForm.description,
-      amount: parseFloat(transactionForm.amount),
-      type: transactionForm.type,
-      account: { id: parseInt(transactionForm.accountId, 10) },
-      category: { id: parseInt(transactionForm.categoryId, 10) }
-    };
-
-    await createTransaction(payload);
+    
+    if (isTransfer) {
+      await transferMoney(parseInt(transactionForm.accountId, 10), parseInt(transactionForm.toAccountId, 10), parseFloat(transactionForm.amount));
+    } else {
+      const payload = {
+        description: transactionForm.description,
+        amount: parseFloat(transactionForm.amount),
+        type: transactionForm.type,
+        account: { id: parseInt(transactionForm.accountId, 10) },
+        category: { id: parseInt(transactionForm.categoryId, 10) }
+      };
+      await createTransaction(payload);
+    }
+    
     closeModal();
     loadData();
+  };
+
+  const openNewBudgetModal = () => {
+    setCurrentEditBudget(null);
+    setBudgetForm({ monthlyLimit: '', categoryId: '' });
+    setActiveModal('budget');
+  };
+
+  const openEditBudgetModal = (budget) => {
+    setCurrentEditBudget(budget);
+    setBudgetForm({ monthlyLimit: budget.monthlyLimit, categoryId: budget.category?.id || '' });
+    setActiveModal('budget');
+  };
+
+  const saveBudget = async (event) => {
+    event.preventDefault();
+    const payload = {
+      monthlyLimit: parseFloat(budgetForm.monthlyLimit),
+      category: { id: parseInt(budgetForm.categoryId, 10) }
+    };
+
+    if (currentEditBudget) {
+      await updateBudget(currentEditBudget.id, payload);
+    } else {
+      await createBudget(payload);
+    }
+
+    closeModal();
+    loadData();
+  };
+
+  const deleteBudgetHandler = async (id) => {
+    if (confirm('Budget wirklich löschen?')) {
+      await deleteBudget(id);
+      loadData();
+    }
   };
 
   const applyFilters = async (event) => {
@@ -284,8 +344,31 @@ function App() {
 
       <section className="panel">
         <div className="panel-header">
+          <h2>Budgets & Sparziele</h2>
+          <button type="button" className="ghost-button" onClick={openNewBudgetModal}>Neues Budget</button>
+        </div>
+        <ul>
+          {budgets.map((budget) => (
+            <li key={budget.id} className="entity-row">
+              <div className="entity-view-row">
+                <span><strong>{budget.category?.name}</strong> - {budget.monthlyLimit.toFixed(2)}€/Monat</span>
+                <div className="entity-actions">
+                  <button type="button" className="ghost-button" onClick={() => openEditBudgetModal(budget)}>Bearbeiten</button>
+                  <button type="button" className="ghost-button" onClick={() => deleteBudgetHandler(budget.id)}>Löschen</button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="panel">
+        <div className="panel-header">
           <h2>Transaktionen</h2>
-          <button type="button" className="ghost-button" onClick={openNewTransactionModal}>Neue Transaktion</button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button type="button" className="ghost-button" onClick={openNewTransactionModal}>Neue Transaktion</button>
+            <button type="button" className="ghost-button" onClick={openTransferModal}>Transferieren</button>
+          </div>
         </div>
         <form onSubmit={applyFilters} className="filter-form">
           <div className="filter-row">
@@ -406,27 +489,31 @@ function App() {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h2>Neue Transaktion</h2>
+              <h2>{isTransfer ? 'Geld transferieren' : 'Neue Transaktion'}</h2>
               <button type="button" className="close-button" onClick={closeModal}>×</button>
             </div>
             <form onSubmit={saveTransaction} className="transaction-form">
-              <label>
-                Beschreibung
-                <input value={transactionForm.description} onChange={(e) => setTransactionForm({ ...transactionForm, description: e.target.value })} required />
-              </label>
+              {!isTransfer && (
+                <>
+                  <label>
+                    Beschreibung
+                    <input value={transactionForm.description} onChange={(e) => setTransactionForm({ ...transactionForm, description: e.target.value })} required />
+                  </label>
+                  <label>
+                    Typ
+                    <select value={transactionForm.type} onChange={(e) => setTransactionForm({ ...transactionForm, type: e.target.value })}>
+                      <option value="EXPENSE">Ausgabe</option>
+                      <option value="INCOME">Einnahme</option>
+                    </select>
+                  </label>
+                </>
+              )}
               <label>
                 Betrag
                 <input type="number" step="0.01" value={transactionForm.amount} onChange={(e) => setTransactionForm({ ...transactionForm, amount: e.target.value })} required />
               </label>
               <label>
-                Typ
-                <select value={transactionForm.type} onChange={(e) => setTransactionForm({ ...transactionForm, type: e.target.value })}>
-                  <option value="EXPENSE">Ausgabe</option>
-                  <option value="INCOME">Einnahme</option>
-                </select>
-              </label>
-              <label>
-                Konto
+                {isTransfer ? 'Von Konto' : 'Konto'}
                 <select value={transactionForm.accountId} onChange={(e) => setTransactionForm({ ...transactionForm, accountId: e.target.value })} required>
                   <option value="">Wähle ein Konto</option>
                   {accounts.map((account) => (
@@ -434,15 +521,28 @@ function App() {
                   ))}
                 </select>
               </label>
-              <label>
-                Kategorie
-                <select value={transactionForm.categoryId} onChange={(e) => setTransactionForm({ ...transactionForm, categoryId: e.target.value })} required>
-                  <option value="">Wähle eine Kategorie</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>{category.name}</option>
-                  ))}
-                </select>
-              </label>
+              {isTransfer && (
+                <label>
+                  Zu Konto
+                  <select value={transactionForm.toAccountId} onChange={(e) => setTransactionForm({ ...transactionForm, toAccountId: e.target.value })} required>
+                    <option value="">Wähle ein Konto</option>
+                    {accounts.map((account) => (
+                      <option key={account.id} value={account.id}>{account.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {!isTransfer && (
+                <label>
+                  Kategorie
+                  <select value={transactionForm.categoryId} onChange={(e) => setTransactionForm({ ...transactionForm, categoryId: e.target.value })} required>
+                    <option value="">Wähle eine Kategorie</option>
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>{category.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
               <div className="modal-actions">
                 <button type="submit">Speichern</button>
                 <button type="button" className="ghost-button" onClick={closeModal}>Abbrechen</button>
@@ -496,6 +596,36 @@ function App() {
               <div className="modal-actions">
                 <button type="submit">Speichern</button>
                 <button type="button" className="ghost-button" onClick={() => setActiveModal(null)}>Abbrechen</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {activeModal === 'budget' && (
+        <div className="modal-overlay" onClick={closeModal}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>{currentEditBudget ? 'Budget bearbeiten' : 'Neues Budget'}</h2>
+              <button type="button" className="close-button" onClick={closeModal}>×</button>
+            </div>
+            <form onSubmit={saveBudget} className="transaction-form">
+              <label>
+                Kategorie
+                <select value={budgetForm.categoryId} onChange={(e) => setBudgetForm({ ...budgetForm, categoryId: e.target.value })} required>
+                  <option value="">Wähle eine Kategorie</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Monatliches Limit (€)
+                <input type="number" step="0.01" value={budgetForm.monthlyLimit} onChange={(e) => setBudgetForm({ ...budgetForm, monthlyLimit: e.target.value })} required />
+              </label>
+              <div className="modal-actions">
+                <button type="submit">Speichern</button>
+                <button type="button" className="ghost-button" onClick={closeModal}>Abbrechen</button>
               </div>
             </form>
           </div>

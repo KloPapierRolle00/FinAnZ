@@ -108,4 +108,34 @@ public class TransactionController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/transfer")
+    public ResponseEntity<?> transferMoney(@RequestParam Long fromAccountId, @RequestParam Long toAccountId, @RequestParam double amount) {
+        Account fromAccount = accountRepository.findById(fromAccountId).orElse(null);
+        Account toAccount = accountRepository.findById(toAccountId).orElse(null);
+
+        if (fromAccount == null || toAccount == null) {
+            return ResponseEntity.badRequest().body("Konten nicht gefunden");
+        }
+
+        // Create withdrawal from source account
+        FinancialTransaction withdrawal = new FinancialTransaction();
+        withdrawal.setDescription("Transfer zu " + toAccount.getName());
+        withdrawal.setAmount(amount);
+        withdrawal.setType(TransactionType.EXPENSE);
+        withdrawal.setDate(LocalDate.now());
+        withdrawal.setAccount(fromAccount);
+        transactionRepository.save(withdrawal);
+
+        // Create deposit to target account
+        FinancialTransaction deposit = new FinancialTransaction();
+        deposit.setDescription("Transfer von " + fromAccount.getName());
+        deposit.setAmount(amount);
+        deposit.setType(TransactionType.INCOME);
+        deposit.setDate(LocalDate.now());
+        deposit.setAccount(toAccount);
+        transactionRepository.save(deposit);
+
+        return ResponseEntity.ok().body("Transfer erfolgreich");
+    }
 }

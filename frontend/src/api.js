@@ -110,3 +110,40 @@ export async function deleteRecurringTransaction(id) {
   });
   return response.ok;
 }
+
+export async function fetchBudgets() {
+  const response = await fetch(`${API_BASE}/budgets`);
+  return response.json();
+}
+
+export async function createBudget(budget) {
+  const response = await fetch(`${API_BASE}/budgets`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(budget)
+  });
+  return response.json();
+}
+
+export async function updateBudget(id, budget) {
+  const response = await fetch(`${API_BASE}/budgets/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(budget)
+  });
+  return response.json();
+}
+
+export async function deleteBudget(id) {
+  const response = await fetch(`${API_BASE}/budgets/${id}`, {
+    method: 'DELETE'
+  });
+  return response.ok;
+}
+
+export async function transferMoney(fromAccountId, toAccountId, amount) {
+  const response = await fetch(`${API_BASE}/transactions/transfer?fromAccountId=${fromAccountId}&toAccountId=${toAccountId}&amount=${amount}`, {
+    method: 'POST'
+  });
+  return response.ok;
+}

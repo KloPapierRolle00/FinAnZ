@@ -34,4 +34,28 @@ public class BudgetController {
         Budget saved = budgetRepository.save(budget);
         return ResponseEntity.ok(saved);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Budget> updateBudget(@PathVariable Long id, @RequestBody Budget update) {
+        return budgetRepository.findById(id).map(existing -> {
+            if (update.getMonthlyLimit() > 0) {
+                existing.setMonthlyLimit(update.getMonthlyLimit());
+            }
+            if (update.getCategory() != null && update.getCategory().getId() != null) {
+                Category category = categoryRepository.findById(update.getCategory().getId()).orElse(null);
+                existing.setCategory(category);
+            }
+            Budget saved = budgetRepository.save(existing);
+            return ResponseEntity.ok(saved);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteBudget(@PathVariable Long id) {
+        if (budgetRepository.existsById(id)) {
+            budgetRepository.deleteById(id);
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
